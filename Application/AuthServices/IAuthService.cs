@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using StoreProject.Requests;
 using StoreProject.Responses;
 
@@ -16,4 +17,7 @@ public interface IAuthService
     Task<AuthResponse> LoginAsync(
         LoginRequest request,
         CancellationToken cancellationToken = default);
+    Task<IActionResult> LogoutAsync(
+    LogoutRequest request,
+    CancellationToken cancellationToken);
 }
