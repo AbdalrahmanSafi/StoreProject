@@ -5,6 +5,7 @@ public record RegisterClientRequest(
     string LastName,
     string Email,
     string Phone,
+    string Address,
     string Password,
     string Gender,
     bool TermsOfUse

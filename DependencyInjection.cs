@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using StoreProject.Services;
 using StoreProject.Security;
 namespace StoreProject.Data.DependencyInjection;
 
@@ -63,6 +64,7 @@ public static class DependencyInjection
                     };
             });
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IAuthService, AuthService>();
         services.AddAuthorization();
 
         return services;

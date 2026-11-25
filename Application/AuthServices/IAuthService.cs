@@ -19,5 +19,5 @@ public interface IAuthService
         CancellationToken cancellationToken = default);
     Task<IActionResult> LogoutAsync(
     LogoutRequest request,
-    CancellationToken cancellationToken);
+    CancellationToken cancellationToken = default);
 }

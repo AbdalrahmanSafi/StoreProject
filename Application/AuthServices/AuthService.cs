@@ -1,4 +1,3 @@
-
 using StoreProject.Requests;
 using StoreProject.Responses;
 using StoreProject.Data;
@@ -6,7 +5,6 @@ using StoreProject.Entities.Users;
 using StoreProject.Entities.Users.Tokens;
 using StoreProject.Security;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace StoreProject.Services;
@@ -26,32 +24,33 @@ public class AuthService(AppDbContext context, ITokenService tokenService) : IAu
             throw new Exception("Email is already registered.");
 
         var clientRole = await context.Role
-        .FirstOrDefaultAsync(r => r.RoleName == "Client", cancellationToken)
-        ?? throw new Exception("Default 'Client' role not found in database.");
-        var Client = new Client
+            .FirstOrDefaultAsync(r => r.RoleName == "Client", cancellationToken)
+            ?? throw new Exception("Default 'Client' role not found in database.");
+
+        var client = new Client
         {
             UserId = Guid.NewGuid(),
             Username = $"{request.FirstName} {request.LastName}",
             Email = request.Email,
             Phone = request.Phone,
+            Address = request.Address ?? string.Empty,
             Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            Gender = request.Gender == "Female",
+            Gender = request.Gender == "Female"
         };
-        Client.Roles.Add(clientRole);
-        await context.Client.AddAsync(Client, cancellationToken);
+
+        client.Roles.Add(clientRole);
+
+        await context.Client.AddAsync(client, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
-        var (accessToken, expiresAt) = tokenService.GenerateToken(Client);
-
-        var refreshToken = await CreateRefreshTokenAsync(
-            Client,
-            cancellationToken);
+        var (accessToken, expiresAt) = tokenService.GenerateToken(client);
+        var refreshToken = await CreateRefreshTokenAsync(client, cancellationToken);
 
         return new AuthResponse(
-            Client.UserId,
-            Client.Username,
-            Client.Email,
-            Client.Roles,
+            client.UserId,
+            client.Username,
+            client.Email,
+            client.Roles.ToList(),
             accessToken,
             expiresAt,
             refreshToken);
@@ -69,10 +68,11 @@ public class AuthService(AppDbContext context, ITokenService tokenService) : IAu
         if (emailExists)
             throw new Exception("Email is already registered.");
 
-        var clientRole = await context.Role
-        .FirstOrDefaultAsync(r => r.RoleName == "Client", cancellationToken)
-        ?? throw new Exception("Default 'Client' role not found in database.");
-        var Client = new Client
+        var storeAdminRole = await context.Role
+            .FirstOrDefaultAsync(r => r.RoleName == "StoreAdmin", cancellationToken)
+            ?? throw new Exception("'StoreAdmin' role not found in database.");
+
+        var storeAdmin = new StoreAdmin
         {
             UserId = Guid.NewGuid(),
             Username = $"{request.FirstName} {request.LastName}",
@@ -80,21 +80,20 @@ public class AuthService(AppDbContext context, ITokenService tokenService) : IAu
             Phone = request.Phone,
             Password = BCrypt.Net.BCrypt.HashPassword(request.Password)
         };
-        Client.Roles.Add(clientRole);
-        await context.Client.AddAsync(Client, cancellationToken);
+
+        storeAdmin.Roles.Add(storeAdminRole);
+
+        await context.StoreAdmin.AddAsync(storeAdmin, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
-        var (accessToken, expiresAt) = tokenService.GenerateToken(Client);
-
-        var refreshToken = await CreateRefreshTokenAsync(
-            Client,
-            cancellationToken);
+        var (accessToken, expiresAt) = tokenService.GenerateToken(storeAdmin);
+        var refreshToken = await CreateRefreshTokenAsync(storeAdmin, cancellationToken);
 
         return new AuthResponse(
-            Client.UserId,
-            Client.Username,
-            Client.Email,
-            Client.Roles,
+            storeAdmin.UserId,
+            storeAdmin.Username,
+            storeAdmin.Email,
+            storeAdmin.Roles.ToList(),
             accessToken,
             expiresAt,
             refreshToken);
@@ -108,31 +107,27 @@ public class AuthService(AppDbContext context, ITokenService tokenService) : IAu
 
         var user = await context.User
             .Include(u => u.Roles)
-            .FirstOrDefaultAsync(
-                u => u.Email == request.Email,
-                cancellationToken);
+            .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
 
         if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             throw new Exception("Invalid email or password.");
 
         var (accessToken, expiresAt) = tokenService.GenerateToken(user);
-
-        var refreshToken = await CreateRefreshTokenAsync(
-            user,
-            cancellationToken);
+        var refreshToken = await CreateRefreshTokenAsync(user, cancellationToken);
 
         return new AuthResponse(
             user.UserId,
             user.Username,
             user.Email,
-            user.Roles,
+            user.Roles.ToList(),
             accessToken,
             expiresAt,
             refreshToken);
     }
+
     private async Task<string> CreateRefreshTokenAsync(
-    User user,
-    CancellationToken cancellationToken)
+        User user,
+        CancellationToken cancellationToken)
     {
         var refreshToken = tokenService.GenerateRefreshToken();
 
@@ -146,10 +141,7 @@ public class AuthService(AppDbContext context, ITokenService tokenService) : IAu
             RevokedAt = null
         };
 
-        await context.RefreshTokens.AddAsync(
-            refreshTokenEntity,
-            cancellationToken);
-
+        await context.RefreshTokens.AddAsync(refreshTokenEntity, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
         return refreshToken;

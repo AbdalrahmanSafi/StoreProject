@@ -1,0 +1,30 @@
+@baseUrl = http://localhost:5273
+
+### Register client
+POST {{baseUrl}}/api/auth/register/Client
+Content-Type: application/json
+
+{
+    "FirstName": "Ahmad",
+    "LastName": "Abd",
+    "Email": "ahmad.a@gmail.com",
+    "Phone": "0777777777",
+    "Address": "Amman",
+    "Password": "Password123!",
+    "Gender": "Male",
+    "TermsOfUse": true
+}
+
+### Register StoreAdmin
+POST {{baseUrl}}/api/auth/register/StoreAdmin
+Content-Type: application/json
+
+{
+    "FirstName": "Abdullah",
+    "LastName": "mohammad",
+    "Email": "abdul.m@gmail.com",
+    "Phone": "0777777777",
+    "Password": "Password123!",
+    "Gender": "Male",
+    "TermsOfUse": true
+}
