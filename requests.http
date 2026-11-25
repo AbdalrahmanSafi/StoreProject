@@ -5,13 +5,13 @@ POST {{baseUrl}}/api/auth/register/Client
 Content-Type: application/json
 
 {
-    "FirstName": "Ahmad",
-    "LastName": "Abd",
-    "Email": "ahmad.a@gmail.com",
+    "FirstName": "Lana",
+    "LastName": "Khalid",
+    "Email": "Lana.k@gmail.com",
     "Phone": "0777777777",
     "Address": "Amman",
     "Password": "Password123!",
-    "Gender": "Male",
+    "Gender": "Female",
     "TermsOfUse": true
 }
 
@@ -27,4 +27,21 @@ Content-Type: application/json
     "Password": "Password123!",
     "Gender": "Male",
     "TermsOfUse": true
+}
+
+### Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+    "Email": "abdul.m@gmail.com",
+    "Password": "Password123!"
+}
+
+### Logout
+POST {{baseUrl}}/api/auth/logout
+Content-Type: application/json
+
+{
+    "RefreshToken": "T1al7L3UxcRPdR5QU0CRabopTE/lbfmJ4gHMxhAh/dLqFGy6tAWWqGXIT572VgNA8ncH0kqiCbPCiGaSROuhRw=="
 }
