@@ -167,4 +167,36 @@ public class AuthService(AppDbContext context, ITokenService tokenService) : IAu
 
         return new OkObjectResult(new { message = "Logged out successfully." });
     }
+
+    public async Task<IActionResult> RefreshTokensAsync(
+            RefreshTokensRequest request,
+            CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.RefreshToken))
+            return new UnauthorizedObjectResult(new { message = "Refresh token is required." });
+
+        var tokenHash = tokenService.HashRefreshToken(request.RefreshToken);
+
+        var existingToken = await context.RefreshTokens
+            .Include(rt => rt.User)
+                .ThenInclude(u => u.Roles)
+            .FirstOrDefaultAsync(t => t.TokenHash == tokenHash, cancellationToken);
+
+        if (existingToken is null || existingToken.RevokedAt is not null || existingToken.ExpiresAt <= DateTime.UtcNow)
+            return new UnauthorizedObjectResult(new { message = "Invalid or expired refresh token." });
+
+        context.RefreshTokens.Remove(existingToken);
+
+        var (accessToken, expiresAt) = tokenService.GenerateToken(existingToken.User);
+        var newRefreshToken = await CreateRefreshTokenAsync(existingToken.User, cancellationToken);
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        return new OkObjectResult(new
+        {
+            accessToken,
+            expiresAt,
+            refreshToken = newRefreshToken
+        });
+    }
 }

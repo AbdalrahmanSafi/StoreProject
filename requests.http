@@ -1,4 +1,6 @@
 @baseUrl = http://localhost:5273
+@refresh = "/zJl0+q/o7YyzhmCiBAmxwGCoXwzW1gbeaB7rS0mQZxKRwOkyUQ7UHBZykzaA0V2KYPGKBwi0ZwAYNf9jwh4QQ=="
+@access = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5Y2UyZjkyYS1kMWMwLTRjZmEtOGJiYi1mZDg1NWIyMmY5OTgiLCJlbWFpbCI6ImFiZHVsLm1AZ21haWwuY29tIiwidW5pcXVlX25hbWUiOiJBYmR1bGxhaCBtb2hhbW1hZCIsImp0aSI6IjhiZGNlMTJmLWUzNDktNDI3Yi05OGJhLWEzN2MyMjM2MTUzYSIsIm5iZiI6MTc5NTU5MzU3MywiZXhwIjoxNzk1NTk0NDczLCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo1MjczIiwiYXVkIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6NTI3MyJ9.NJw8C2fOdja-XTRIdm4rpSfhCU4jEVSeqF498z3Y8MI
 
 ### Register client
 POST {{baseUrl}}/api/auth/register/Client
@@ -15,7 +17,7 @@ Content-Type: application/json
     "TermsOfUse": true
 }
 
-### Register StoreAdmin
+### Register Store Admin
 POST {{baseUrl}}/api/auth/register/StoreAdmin
 Content-Type: application/json
 
@@ -43,5 +45,12 @@ POST {{baseUrl}}/api/auth/logout
 Content-Type: application/json
 
 {
-    "RefreshToken": "T1al7L3UxcRPdR5QU0CRabopTE/lbfmJ4gHMxhAh/dLqFGy6tAWWqGXIT572VgNA8ncH0kqiCbPCiGaSROuhRw=="
+    "RefreshToken": {{refresh}}
+}
+### Refresh The access and Refresh Tokens
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+    "RefreshToken": {{refresh}}
 }

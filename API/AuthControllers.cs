@@ -42,4 +42,12 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         return authService.LogoutAsync(request, cancellationToken);
     }
+
+    [HttpPost("refresh")]
+    public Task<IActionResult> RefreshTokens(
+        [FromBody] RefreshTokensRequest request,
+        CancellationToken cancellationToken)
+    {
+        return authService.RefreshTokensAsync(request, cancellationToken);
+    }
 }
